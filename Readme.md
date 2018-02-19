@@ -1,6 +1,6 @@
 # Life Is A Comonad
 
-Repo for my blog post on comonads.
+Repo for my [blog post on comonads](https://eli-jordan.github.io/2018/02/16/life-is-a-comonad/).
 
 Contains
 
