@@ -66,7 +66,7 @@ object LifeStore extends App {
             case true if liveCount < 2 => false
             case true if liveCount == 2 || liveCount == 3 => true
             case true if liveCount > 3 => false
-            case true if liveCount == 3 => true
+            case false if liveCount == 3 => true
             case x => x
         }
     }
