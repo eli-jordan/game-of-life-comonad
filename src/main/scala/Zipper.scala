@@ -12,12 +12,10 @@ case class StreamZipper[A](left: Stream[A], focus: A, right: Stream[A]) {
         else new StreamZipper[A](focus #:: left, right.head, right.tail)
 
     private lazy val lefts: Stream[StreamZipper[A]] =
-        if (left.isEmpty) Stream.empty
-        else Stream.iterate(moveLeft)(_.moveLeft).zip(left.tail).map(_._1)
+        Stream.iterate(this)(_.moveLeft).tail.zip(left).map(_._1)
 
     private lazy val rights: Stream[StreamZipper[A]] =
-        if (right.isEmpty) Stream.empty
-        else Stream.iterate(moveRight)(_.moveRight).zip(right.tail).map(_._1)
+        Stream.iterate(this)(_.moveRight).zip(right).map(_._1)
 
     def map[B](f: A => B): StreamZipper[B] =
         new StreamZipper[B](left.map(f), f(focus), right.map(f))
@@ -45,7 +43,7 @@ object StreamZipper {
     def apply[A](as: List[A]): StreamZipper[A] =
         new StreamZipper[A](Stream.empty, as.head, as.tail.toStream)
 
-    implicit val ListZipperComonad: Comonad[StreamZipper] = new Comonad[StreamZipper] {
+    implicit val StreamZipperComonad: Comonad[StreamZipper] = new Comonad[StreamZipper] {
 
         override def extract[A](fa: StreamZipper[A]): A =
             fa.focus

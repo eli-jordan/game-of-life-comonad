@@ -4,6 +4,64 @@ import cats.implicits._
 
 import scala.collection.mutable
 
+/**
+ * Store is
+ *    (S => A, S)
+ *
+ * cojoin generates
+ *    (S => (S => A, S), S)
+ *     v             ^
+ *     |             |
+ *     +-------------+
+ *        substitute
+ *
+ * It generates a new function, that when we pass in an S index, it substitutes
+ * that index as the 'focus' (i.e. the second element of the tuple in this view)
+ * index in the original store.
+ *
+ * So, using concrete types
+ *
+ * def initial(i: Int): String = s"$i"
+ *
+ * // Define an initial store
+ * val original: (Int => String, Int) = (initial, 0)
+ *
+ * // The result of original.cojoin would look like this.
+ * // We just add an extra layer of functions, so that we can substitute the
+ * // passed index into the original store.
+ * val cojoined = ((s: Int) => (initial, s), 0)
+ *
+ * So,
+ * cojoined(0) == (initial, 0)
+ * cojoined(1) == (initial, 1)
+ * .. etc
+ *
+ * And when we map over cojoined, we just compose the functions.
+ * Say we have have
+ *
+ * def threeOf(s: String): String = s"$s$s$s"
+ *
+ * original.map(threeOf) == (initial.andThen(threeOf), 0)
+ *
+ * Then,
+ *
+ * // Square the current focus
+ * def square(s: (Int => String, Int)): Int = s.counit.length * s.counit.length
+ *
+ * val coflatMapped = original.coflatMap(square)
+ *    = original.cojoin.map(square)
+ *    = (
+ *        ((s: Int) => (initial, s)).andThen(square),
+ *        0
+ *      )
+ *
+ * So, when we access an element,
+ * coflatMapped(1)
+ *    = square((initial, 1)) // Substitute s=1
+ *    = initial(1).length * initial(1).length // By definition of square
+ *    = 1 * 1 // By definition of initial
+ *
+ */
 case class Store[S, A](lookup: S => A)(val index: S) {
 
     def peek(s: S): A = lookup(s)
@@ -12,6 +70,7 @@ case class Store[S, A](lookup: S => A)(val index: S) {
 
     lazy val cojoin: Store[S, Store[S, A]] =
         Store(Store(lookup))(index)
+    // Alternatively - Store[S, Store[S, A]](s => Store(lookup)(s))(index)
 
     def map[B](f: A => B): Store[S, B] =
         Store(Store.memoize(lookup.andThen(f)))(index)
@@ -24,6 +83,8 @@ case class Store[S, A](lookup: S => A)(val index: S) {
         s"lookup: $lookup index: $index"
     }
 }
+
+
 
 object Store {
 
