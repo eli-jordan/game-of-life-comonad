@@ -4,33 +4,6 @@ import cats.implicits._
 
 object LifeZipper extends App {
 
-//    case class StreamZipperT[W[_]: Comonad, A](value: W[StreamZipper[A]]) {
-//        def map[B](f: A => B): StreamZipperT[W, B] =
-//            StreamZipperT(value.map(_.map(f)))
-//
-//        def extract: A =
-//            value.extract.extract
-//
-//        def duplicate: StreamZipperT[W, StreamZipperT[W, A]] = {
-//
-//            // Takes W[W[A]] and adds one additional layer, creating W[W[W[A]]]
-//            def layer[X](u: W[StreamZipper[X]]): StreamZipperT[W, W[StreamZipper[X]]] = {
-//
-//                val xxx: W[StreamZipper[X]] = u.coflatten.map(_.extract)
-//                StreamZipperT(xxx)
-////                val xxx: W[StreamZipper[StreamZipper[X]]] = u.map(_.duplicate)
-////                val xxx: W[StreamZipperT[W, X]] = u.coflatten.map(wwszx => StreamZipperT(wwszx))
-//
-////                val lefts = Stream.iterate(u)(ssx => ssx.map(_.moveLeft)).tail //.zip(u.left).map(_._1)
-////                val rights = Stream.iterate(u)(ssx => ssx.map(_.moveRight)).tail //.zip(u.right).map(_._1)
-////                StreamZipperT(lefts, u, rights)
-//            }
-//
-//            val layers = layer(layer(value))
-//            Grid(layers).map(Grid.apply)
-//        }
-//    }
-
     case class Grid[A](value: StreamZipper[StreamZipper[A]]) {
 
         def map[B](f: A => B): Grid[B] =
@@ -58,7 +31,7 @@ object LifeZipper extends App {
             // Notice that the implementation is very similar to what we had in our original zipper
             // except that we need to make use the 'map' function in the iteration.
             def layer[X](u: StreamZipper[StreamZipper[X]]): StreamZipper[StreamZipper[StreamZipper[X]]] = {
-                val lefts = Stream.iterate(u)(ssx => ssx.map(_.moveLeft)).tail.zip(u.left).map(_._1)
+                val lefts = Stream.iterate(u)(ssx => ssx.map(_.moveLeft)).tail.zip(u.left).magstp(_._1)
                 val rights = Stream.iterate(u)(ssx => ssx.map(_.moveRight)).tail.zip(u.right).map(_._1)
                 StreamZipper(lefts, u, rights)
             }
@@ -88,7 +61,7 @@ object LifeZipper extends App {
             fa.map(f)
     }
 
-    def neighbours(grid: Grid[Boolean]): List[Boolean] = List(
+    def neighbours[A](grid: Grid[A]): List[A] = List(
         grid.moveUp,
         grid.moveDown,
         grid.moveLeft,

@@ -3,7 +3,7 @@ name := "game-of-life-comonad"
 scalaVersion := "2.12.3"
 scalacOptions += "-Ypartial-unification"
 
-//mainClass in (Compile, run) := Some("LifeStore")
+mainClass in (Compile, run) := Some("LifeZipper")
 
 libraryDependencies ++= Seq(
         "org.typelevel" %% "cats-core" % "1.0.1",
