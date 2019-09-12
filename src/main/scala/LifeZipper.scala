@@ -31,7 +31,7 @@ object LifeZipper extends App {
             // Notice that the implementation is very similar to what we had in our original zipper
             // except that we need to make use the 'map' function in the iteration.
             def layer[X](u: StreamZipper[StreamZipper[X]]): StreamZipper[StreamZipper[StreamZipper[X]]] = {
-                val lefts = Stream.iterate(u)(ssx => ssx.map(_.moveLeft)).tail.zip(u.left).magstp(_._1)
+                val lefts = Stream.iterate(u)(ssx => ssx.map(_.moveLeft)).tail.zip(u.left).map(_._1)
                 val rights = Stream.iterate(u)(ssx => ssx.map(_.moveRight)).tail.zip(u.right).map(_._1)
                 StreamZipper(lefts, u, rights)
             }
