@@ -92,7 +92,7 @@ object Store {
         override def apply(key: I): O = getOrElseUpdate(key, f(key))
     }
 
-    implicit def StoreComonadInstance[S]: Comonad[Store[S, ?]] = new Comonad[Store[S, ?]] {
+    implicit def StoreComonadInstance[S]: Comonad[Store[S, *]] = new Comonad[Store[S, *]] {
         override def extract[A](fa: Store[S, A]): A =
             fa.counit
 
@@ -185,7 +185,7 @@ object LifeStore extends App {
         while (true) {
             current = step(current)
             val rendered = render(current)
-            println("\033\143") // Clear the terminal
+            println("\u001b\u0063") // Clear the terminal
             println(rendered)
             Thread.sleep(300)
         }
