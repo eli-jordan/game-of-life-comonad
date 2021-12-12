@@ -1,13 +1,12 @@
 name := "game-of-life-comonad"
 
-scalaVersion := "2.12.3"
-scalacOptions += "-Ypartial-unification"
+scalaVersion := "2.13.6"
 
 mainClass in (Compile, run) := Some("LifeZipper")
 
 libraryDependencies ++= Seq(
-        "org.typelevel" %% "cats-core" % "2.0.0-M1",
-        "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+        "org.typelevel" %% "cats-core" % "2.7.0",
+        "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
 
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.4")
+addCompilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)

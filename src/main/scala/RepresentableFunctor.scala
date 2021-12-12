@@ -22,8 +22,8 @@ object RepresentableFunctor extends App {
     /**
      * The reader functor is the identity representable. i.e. it represents itself
      */
-    implicit def readerRepresentable[E]: Representable[E => ?, E] = new Representable[E => ?, E] {
-        override implicit def F: Functor[E => ?] = Monad[E => ?]
+    implicit def readerRepresentable[E]: Representable[E => *, E] = new Representable[E => *, E] {
+        override implicit def F: Functor[E => *] = Monad[E => *]
 
         override def tabulate[A](f: E => A): E => A = f
 
@@ -72,10 +72,10 @@ object RepresentableFunctor extends App {
         }
     }
 
-    def FnStore[S, A](fn: S => A, index: S): RepresentableStore[S => ?, S, A] =
-        RepresentableStore[S => ?, S, A](fn)(index)
+    def FnStore[S, A](fn: S => A, index: S): RepresentableStore[S => *, S, A] =
+        RepresentableStore[S => *, S, A](fn)(index)
 
-    implicit def StoreComonadInstance[F[_], S](implicit R: Representable[F, S]): Comonad[RepresentableStore[F, S, ?]] = new Comonad[RepresentableStore[F, S, ?]] {
+    implicit def StoreComonadInstance[F[_], S](implicit R: Representable[F, S]): Comonad[RepresentableStore[F, S, *]] = new Comonad[RepresentableStore[F, S, *]] {
         override def extract[A](fa: RepresentableStore[F, S, A]): A =
             fa.counit
 
@@ -102,8 +102,8 @@ object RepresentableFunctor extends App {
             fa.map { case (k, v) => (k, f(v)) }
     }
 
-    implicit def mapRepresentable[E]: Representable[mutable.Map[E, ?], E] = new Representable[mutable.Map[E, ?], E] {
-        override implicit def F: Functor[mutable.Map[E, ?]] = mapFunctor
+    implicit def mapRepresentable[E]: Representable[mutable.Map[E, *], E] = new Representable[mutable.Map[E, *], E] {
+        override implicit def F: Functor[mutable.Map[E, *]] = mapFunctor
 
         override def tabulate[A](f: E => A): mutable.Map[E, A] = new mutable.HashMap[E, A]() {
             override def apply(key: E): A = getOrElseUpdate(key, f(key))
@@ -112,7 +112,7 @@ object RepresentableFunctor extends App {
         override def index[A](f: mutable.Map[E, A]): E => A = e => f(e)
     }
 
-    val stringMap = Representable[mutable.Map[Int, ?], Int].tabulate(string)
+    val stringMap = Representable[mutable.Map[Int, *], Int].tabulate(string)
     println(stringMap(1))
 }
 
@@ -121,7 +121,7 @@ object RepresentableLifeStore extends App {
     import RepresentableFunctor._
 
     type Coord = (Int, Int)
-    type Grid[A] = RepresentableStore[Coord => ?, Coord, A]
+    type Grid[A] = RepresentableStore[Coord => *, Coord, A]
 
     def neighbourCoords(x: Int, y: Int): List[Coord] = List(
         (x + 1, y),
@@ -196,11 +196,11 @@ object RepresentableLifeStore extends App {
     val initialState = (glider at(0, 0)) ++ (beacon at(15, 5)) ++ (blinker at(16, 4))
 
     def gameLoop(): Unit = {
-        var current = RepresentableStore[Coord => ?, Coord, Boolean](coord => initialState.getOrElse(coord, false))((0, 0))
+        var current = RepresentableStore[Coord => *, Coord, Boolean](coord => initialState.getOrElse(coord, false))((0, 0))
         while (true) {
             current = step(current)
             val rendered = render(current)
-            println("\033\143") // Clear the terminal
+            println("\u001b\u0063") // Clear the terminal
             println(rendered)
             Thread.sleep(300)
         }
